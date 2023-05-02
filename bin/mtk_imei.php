@@ -20,6 +20,18 @@
     return pack('l', intval32($sum + $tempNum) ^ $size);
   }
 
+  function checksum_2b($data)
+  {
+    $sum = 0;
+    $size = strlen($data);
+    for($i = 0; $i < $size; $i++)
+    {
+      $value = unpack('C', $data, $i)[1];
+      $sum = $i % 2 == 0 ? $sum + $value : $sum ^ $value;
+    }
+    return "\xAA".pack('C', $sum);
+  }
+
   function checksum_8b($data)
   {
     $sum = '';
@@ -103,9 +115,11 @@
   $cssd_offset = $toc_size + unpack('V', $nvram, $cssd_offset - 8)[1];
   $wifi_offset = strpos($nvram, '/mnt/vendor/nvdata/APCFG/APRDEB/WIFI') or
     die('Cannot find WIFI file in NVRAM image.');
+  $wifi_size = unpack('V', $nvram, $wifi_offset - 4)[1];
   $wifi_offset = $toc_size + unpack('V', $nvram, $wifi_offset - 8)[1];
   $bt_offset = strpos($nvram, '/mnt/vendor/nvdata/APCFG/APRDEB/BT_Addr') or
     die('Cannot find BT_Addr file in NVRAM image.');
+  $bt_size = unpack('V', $nvram, $bt_offset - 4)[1];
   $bt_offset = $toc_size + unpack('V', $nvram, $bt_offset - 8)[1];
   $nvram = str_replace('/CALIBRAT/', '/CALIBRUH/', $nvram);
   @mkdir('out');
@@ -117,8 +131,14 @@
   fwrite($fp, $cssd);
   fseek($fp, $wifi_offset + 4);
   fwrite($fp, hex2bin($config['wifi_mac']));
+  fseek($fp, $wifi_offset);
+  $wifi = fread($fp, $wifi_size - 2);
+  fwrite($fp, checksum_2b($wifi));
   fseek($fp, $bt_offset);
   fwrite($fp, hex2bin($config['bt_mac']));
+  fseek($fp, $bt_offset);
+  $bt = fread($fp, $bt_size - 2);
+  fwrite($fp, checksum_2b($bt));
   fseek($fp, $toc_size);
   $content = fread($fp, $content_size);
   fseek($fp, 0x0C);
