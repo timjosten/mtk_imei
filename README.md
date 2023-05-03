@@ -11,7 +11,8 @@ A script that recreates NVRAM partition and makes private TWRP flashable for you
 2. Mount Vendor partition and delete `/vendor/etc/init/md_patcher.rc` and `/vendor/lib/modules/md_patcher.ko` files.
 
 ## Notes
-Currently only MIUI 12.5 stock kernel is supported or [ROMs](https://t.me/crDroidOSb) based on its vendor.
+Flashable supports all 4.14 kernels (both stock and OSS). You have to flash it every time you wipe your Vendor partition.
+Includes prebuilt `md_patcher.ko` [kernel module](https://github.com/timjosten/Xiaomi_Kernel_OpenSource/tree/begonia-r-oss/drivers/misc/mediatek/md_patcher). Kernel maintainers should not include it in their kernels because it works as external loadable module only.
 
 ## Prerequisites
 [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) (x64)
