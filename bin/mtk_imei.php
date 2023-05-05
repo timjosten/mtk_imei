@@ -155,5 +155,6 @@
   $zip->addFile('out/nvram.img', 'nvram.img') or
     die("Cannot add file to zip archive.\n");
   $zip->close();
+  unlink('out/nvram.img');
 
   exit("Success!\n");
