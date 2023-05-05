@@ -1,4 +1,6 @@
 <?php
+  ini_set('memory_limit', '1024M');
+
   function intval32($value)
   {
     $value = $value & 0xFFFFFFFF;
@@ -44,9 +46,9 @@
   echo "MTK IMEI patcher by timjosten\n\n";
 
   $config = file_get_contents('config.txt') or
-    die('Cannot open config file.');
+    die("Cannot open config file.\n");
   $config = json_decode($config, true) or
-    die('Malformed config file.');
+    die("Malformed config file.\n");
   $config['wifi_mac'] = strtoupper(str_replace(':', '', $config['wifi_mac']));
   $config['bt_mac']   = strtoupper(str_replace(':', '', $config['bt_mac']));
   if(strlen($config['product'])  == 0
@@ -56,16 +58,16 @@
   //|| strlen($config['meid'])     != 14
   || strlen($config['wifi_mac']) != 12
   || strlen($config['bt_mac'])   != 12)
-    die('Incorrect values in config file.');
+    die("Incorrect values in config file.\n");
 
   $privatekey_2048 = file_get_contents('data/private_2048.pem') or
-    die('Cannot open private key 2048.');
+    die("Cannot open private key 2048.\n");
   $privatekey_1024 = file_get_contents('data/private_1024.pem') or
-    die('Cannot open private key 1024.');
+    die("Cannot open private key 1024.\n");
   $modulus_1024 = openssl_pkey_get_details(openssl_pkey_get_private($privatekey_1024))['rsa']['n'];
   $exponent_1024 = '10001';
   if(strlen($modulus_1024) != 128)
-    die('Cannot extract modulus from private key 1024.');
+    die("Cannot extract modulus from private key 1024.\n");
 
   $data = $exponent_1024;
   $data .= bin2hex($modulus_1024);
@@ -75,7 +77,7 @@
   $signature .= "\x00";
   $signature .= hash('sha256', $data, true);
   openssl_private_encrypt($signature, $devPubKeySign, $privatekey_2048, OPENSSL_NO_PADDING) or
-    die('Cannot sign using private key 2048.');
+    die("Cannot sign using private key 2048.\n");
   $devPubKeySign = strtoupper(bin2hex($devPubKeySign));
 
   $data = "\x00\x01\x00\x62";  // ends with 0x72 for chinese begonia
@@ -91,7 +93,7 @@
   $signature .= "\x00";
   $signature .= hash('sha256', $data, true);
   openssl_private_encrypt($signature, $crticalDataSign, $privatekey_1024, OPENSSL_NO_PADDING) or
-    die('Cannot sign using private key 1024.');
+    die("Cannot sign using private key 1024.\n");
   $crticalDataSign = bin2hex($crticalDataSign);
 
   $cssd = 'devPubKeyModulus:'.bin2hex($modulus_1024);
@@ -103,30 +105,30 @@
   $cssd .= checksum_8b($cssd);
 
   $header = file_get_contents('data/header.bin') or
-    die('Cannot open header data.');
+    die("Cannot open header data.\n");
   $cssd = $header.$cssd;
 
   $nvram = file_get_contents('data/nvram.bin') or
-    die('Cannot open original NVRAM image.');
+    die("Cannot open original NVRAM image.\n");
   $toc_size = 0x20000;
   $content_size = unpack('V', $nvram, 4)[1];
   $cssd_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/CSSD_000') or
-    die('Cannot find CSSD LID in NVRAM image.');
+    die("Cannot find CSSD LID in NVRAM image.\n");
   $cssd_offset = $toc_size + unpack('V', $nvram, $cssd_offset - 8)[1];
   $wifi_offset = strpos($nvram, '/mnt/vendor/nvdata/APCFG/APRDEB/WIFI') or
-    die('Cannot find WIFI file in NVRAM image.');
+    die("Cannot find WIFI file in NVRAM image.\n");
   $wifi_size = unpack('V', $nvram, $wifi_offset - 4)[1];
   $wifi_offset = $toc_size + unpack('V', $nvram, $wifi_offset - 8)[1];
   $bt_offset = strpos($nvram, '/mnt/vendor/nvdata/APCFG/APRDEB/BT_Addr') or
-    die('Cannot find BT_Addr file in NVRAM image.');
+    die("Cannot find BT_Addr file in NVRAM image.\n");
   $bt_size = unpack('V', $nvram, $bt_offset - 4)[1];
   $bt_offset = $toc_size + unpack('V', $nvram, $bt_offset - 8)[1];
   $nvram = str_replace('/CALIBRAT/', '/CALIBRUH/', $nvram);
   @mkdir('out');
   file_put_contents('out/nvram.img', $nvram) or
-    die('Cannot save NVRAM image.');
+    die("Cannot save NVRAM image.\n");
   $fp = fopen('out/nvram.img', 'r+b') or
-    die('Cannot open NVRAM image.');
+    die("Cannot open NVRAM image.\n");
   fseek($fp, $cssd_offset);
   fwrite($fp, $cssd);
   fseek($fp, $wifi_offset + 4);
@@ -146,12 +148,12 @@
   fclose($fp);
 
   copy('data/patch.zip', 'out/imei_repair.zip') or
-    die('Cannot copy zip archive.');
+    die("Cannot copy zip archive.\n");
   $zip = new ZipArchive;
   $zip->open('out/imei_repair.zip') or
-    die('Cannot open zip archive.');
+    die("Cannot open zip archive.\n");
   $zip->addFile('out/nvram.img', 'nvram.img') or
-    die('Cannot add file to zip archive.');
+    die("Cannot add file to zip archive.\n");
   $zip->close();
 
-  exit('Success!');
+  exit("Success!\n");
