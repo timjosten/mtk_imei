@@ -9,15 +9,21 @@
     return $value;
   }
 
-  function checksum_nvram($data, $tempNum = 0x0)
+  function checksum_nvram($data)
   {
     $sum = 0;
+    $tempNum = 0;
     $size = strlen($data);
     for($i = 0; $i < $size; $i += 4)
     {
-      $value = @unpack('l', $data, $i)[1];
-      if($value !== false)  // unpack() can get out of bounds
-        $sum = ($i / 4) % 2 == 0 ? $sum ^ $value : $sum + $value;
+      $buf = substr($data, $i, 4);
+      $value = unpack('l', str_pad($buf, 4, "\x00"))[1];
+      if(strlen($buf) < 4)  // last incomplete read
+      {
+        $tempNum = $value;
+        break;
+      }
+      $sum = ($i / 4) % 2 == 0 ? $sum ^ $value : $sum + $value;
     }
     return pack('l', intval32($sum + $tempNum) ^ $size);
   }
