@@ -2,7 +2,7 @@
   "product":  "begonia",
   "comment":  "run 'getprop ro.boot.chipid' in terminal to get chip_id",
   "chip_id":  "",
-  "imei_1":   "",
+  "imei_15474373734
   "imei_2":   "",
   "wifi_mac": "",
   "bt_mac":   ""
