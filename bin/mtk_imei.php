@@ -114,8 +114,8 @@
     die("Cannot open header data.\n");
   $cssd = $header.$cssd;
 
-  $nvram = file_get_contents('data/nvram.bin') or
-    die("Cannot open original NVRAM image.\n");
+  $nvram = file_get_contents("data/${config['product']}/nvram.bin") or
+    die("Cannot open original NVRAM image (this product is not supported yet).\n");
   $toc_size = 0x20000;
   $content_size = unpack('V', $nvram, 4)[1];
   $cssd_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/CSSD_000') or
@@ -159,7 +159,11 @@
   $zip->open('out/imei_repair.zip') or
     die("Cannot open zip archive.\n");
   $zip->addFile('out/nvram.img', 'nvram.img') or
-    die("Cannot add file to zip archive.\n");
+    die("Cannot add nvram.img to zip archive.\n");
+  $zip->addFile("data/${config['product']}/md_patcher.ko", 'vendor/lib/modules/md_patcher.ko') or
+    die("Cannot add md_patcher.ko to zip archive.\n");
+  $zip->addFile("data/${config['product']}/updater-script.txt", 'META-INF/com/google/android/updater-script') or
+    die("Cannot add updater-script to zip archive.\n");
   $zip->close();
   unlink('out/nvram.img');
 
