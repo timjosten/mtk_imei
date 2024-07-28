@@ -15,4 +15,4 @@ Flashable supports all 4.14 kernels (both stock and OSS). You have to flash it e
 Includes prebuilt `md_patcher.ko` [kernel module](https://github.com/timjosten/Xiaomi_Kernel_OpenSource/tree/begonia-r-oss/drivers/misc/mediatek/md_patcher). Kernel maintainers should not include it in their kernels because it works as external loadable module only.
 
 ## Prerequisites
-[Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) (x64)
+[Visual C++ Redistributable for Visual Studio 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe) (x64)
