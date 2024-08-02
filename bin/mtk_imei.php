@@ -55,6 +55,7 @@
     die("Cannot open config file.\n");
   $config = json_decode($config, true) or
     die("Malformed config file.\n");
+  $config['kernel']   = strlen($config['kernel']) ? $config['kernel'] : '4.14';
   $config['wifi_mac'] = strtoupper(str_replace(':', '', $config['wifi_mac']));
   $config['bt_mac']   = strtoupper(str_replace(':', '', $config['bt_mac']));
   if(strlen($config['product'])  == 0
@@ -153,15 +154,16 @@
   fwrite($fp, checksum_nvram($content));
   fclose($fp);
 
-  copy('data/patch.zip', 'out/imei_repair.zip') or
+  $out = "out/imei_repair-${config['product']}-${config['kernel']}.zip";
+  copy('data/patch.zip', $out) or
     die("Cannot copy zip archive.\n");
   $zip = new ZipArchive;
-  $zip->open('out/imei_repair.zip') or
+  $zip->open($out) or
     die("Cannot open zip archive.\n");
   $zip->addFile('out/nvram.img', 'nvram.img') or
     die("Cannot add nvram.img to zip archive.\n");
-  $zip->addFile("data/${config['product']}/md_patcher.ko", 'vendor/lib/modules/md_patcher.ko') or
-    die("Cannot add md_patcher.ko to zip archive.\n");
+  $zip->addFile("data/${config['product']}/md_patcher-${config['kernel']}.ko", 'vendor/lib/modules/md_patcher.ko') or
+    die("Cannot add md_patcher.ko to zip archive (the specified kernel version is not supported).\n");
   $zip->addFile("data/${config['product']}/updater-script.txt", 'META-INF/com/google/android/updater-script') or
     die("Cannot add updater-script to zip archive.\n");
   $zip->close();
