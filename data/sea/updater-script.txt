@@ -1,0 +1,17 @@
+ui_print("Private IMEI repair package by timjosten");
+
+ui_print("Patching nvram...");
+assert(package_extract_file("nvram.img", "/dev/block/platform/bootdevice/by-name/nvram"));
+
+ui_print("Wiping nvdata...");
+run_program("/system/bin/umount", "/nvdata");
+assert(package_extract_file("nvdata.img", "/dev/block/platform/bootdevice/by-name/nvdata"));
+
+ui_print("Patching vendor...");
+run_program("/system/bin/umount", "/vendor");
+run_program("/system/bin/mount", "-t", "ext4", "/dev/block/platform/bootdevice/by-name/vendor", "/vendor");
+package_extract_dir("vendor", "/vendor");
+run_program("/system/bin/umount", "/vendor");
+
+ui_print("Done");
+set_progress(1.000000);
