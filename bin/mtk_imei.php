@@ -111,10 +111,6 @@
   $cssd = str_pad($cssd, 4096, "\x00");
   $cssd .= checksum_8b($cssd);
 
-  $header = file_get_contents('data/header.bin') or
-    die("Cannot open header data.\n");
-  $cssd = $header.$cssd;
-
   $nvram = file_get_contents("data/${config['product']}/nvram.bin") or
     die("Cannot open original NVRAM image (this product is not supported yet).\n");
   $toc_size = 0x20000;
@@ -136,7 +132,7 @@
     die("Cannot save NVRAM image.\n");
   $fp = fopen('out/nvram.img', 'r+b') or
     die("Cannot open NVRAM image.\n");
-  fseek($fp, $cssd_offset);
+  fseek($fp, $cssd_offset + 64);
   fwrite($fp, $cssd);
   fseek($fp, $wifi_offset + 4);
   fwrite($fp, hex2bin($config['wifi_mac']));
