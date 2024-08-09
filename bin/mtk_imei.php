@@ -49,6 +49,34 @@
     return $sum;
   }
 
+  function swap_bytes(&$data)
+  {
+    for($i = 0; $i < strlen($data); $i += 2)
+    {
+      $temp = $data[$i + 1];
+      $data[$i + 1] = $data[$i];
+      $data[$i] = $temp;
+    }
+  }
+
+  function scramble_iv_key(&$iv, &$key, $xor)
+  {
+    swap_bytes($iv);
+    swap_bytes($key);
+    for($i = 0; $i < strlen($iv); $i++)
+    {
+      $iv[$i] = chr(ord($iv[$i]) ^ ord($xor[$i]));
+      $key[$i] = chr(ord($key[$i]) ^ ord($iv[$i]));
+    }
+  }
+
+  function convert_imei($imei)
+  {
+    $imei .= 'F0000';
+    swap_bytes($imei);
+    return hex2bin($imei);
+  }
+
   echo "MTK IMEI patcher by timjosten\n\n";
 
   $config = file_get_contents('config.txt') or
@@ -111,13 +139,38 @@
   $cssd = str_pad($cssd, 4096, "\x00");
   $cssd .= checksum_8b($cssd);
 
+  $ld0b = '';
+  for($i = 1; $i <= 10; $i++)
+  {
+    switch($i)
+    {
+      case 1:
+      case 2:
+        $imei = convert_imei($config["imei_$i"]);
+        break;
+      default:
+        $imei = str_repeat("\xFF", 10);
+    }
+    $ld0b .= str_pad($imei.checksum_8b($imei), 32, "\x00");
+  }
+  $xor  = "\x8F\x9C\x61\x51\xDC\x86\xB9\x16\x3A\x37\x50\x6D\x9D\xFF\x77\x53\x46\x4B\xA7\x3E\x5E\xDE\xF3\x62\x5B\xA1\x8D\x48\x12\x35\x80\x5B";
+  $iv   = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x0B\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x00\x00\x00\x00";
+  $key  = "\x35\x23\x32\x53\x42\x45\x54\x24\x43\x86\x68\x34\x78\x56\x34\x12\x78\x56\x34\x12\x43\x86\x68\x34\x42\x45\x54\x24\x35\x23\x32\x53";
+  $key2 = "\xBE\x41\x0C\x67\x39\x4D\x98\x01\x72\x56\xAA\x3C\x8F\x21\xBB\x42";
+  scramble_iv_key($iv, $key, $xor);
+  $key2 = openssl_encrypt($key2, 'aes-256-cbc', $key,  OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, substr($iv, 0, 16));
+  $ld0b = openssl_encrypt($ld0b, 'aes-128-ecb', $key2, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
+
   $nvram = file_get_contents("data/${config['product']}/nvram.bin") or
     die("Cannot open original NVRAM image (this product is not supported yet).\n");
   $toc_size = 0x20000;
   $content_size = unpack('V', $nvram, 4)[1];
-  $cssd_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/CSSD_000') or
-    die("Cannot find CSSD LID in NVRAM image.\n");
-  $cssd_offset = $toc_size + unpack('V', $nvram, $cssd_offset - 8)[1];
+  $ld0b_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/LD0B_001');
+  if($ld0b_offset !== false)
+    $ld0b_offset = $toc_size + unpack('V', $nvram, $ld0b_offset - 8)[1];
+  $cssd_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/CSSD_000');
+  if($cssd_offset !== false)
+    $cssd_offset = $toc_size + unpack('V', $nvram, $cssd_offset - 8)[1];
   $wifi_offset = strpos($nvram, '/mnt/vendor/nvdata/APCFG/APRDEB/WIFI') or
     die("Cannot find WIFI file in NVRAM image.\n");
   $wifi_size = unpack('V', $nvram, $wifi_offset - 4)[1];
@@ -132,8 +185,16 @@
     die("Cannot save NVRAM image.\n");
   $fp = fopen('out/nvram.img', 'r+b') or
     die("Cannot open NVRAM image.\n");
-  fseek($fp, $cssd_offset + 64);
-  fwrite($fp, $cssd);
+  if($ld0b_offset !== false)
+  {
+    fseek($fp, $ld0b_offset + 64);
+    fwrite($fp, $ld0b);
+  }
+  if($cssd_offset !== false)
+  {
+    fseek($fp, $cssd_offset + 64);
+    fwrite($fp, $cssd);
+  }
   fseek($fp, $wifi_offset + 4);
   fwrite($fp, hex2bin($config['wifi_mac']));
   fseek($fp, $wifi_offset);
@@ -150,7 +211,8 @@
   fwrite($fp, checksum_nvram($content));
   fclose($fp);
 
-  $out = "out/imei_repair-${config['product']}-${config['kernel']}.zip";
+  $config['kernel'] = $cssd_offset !== false ? '-'.$config['kernel'] : '';
+  $out = "out/imei_repair-${config['product']}${config['kernel']}.zip";
   copy('data/patch.zip', $out) or
     die("Cannot copy zip archive.\n");
   $zip = new ZipArchive;
@@ -158,8 +220,11 @@
     die("Cannot open zip archive.\n");
   $zip->addFile('out/nvram.img', 'nvram.img') or
     die("Cannot add nvram.img to zip archive.\n");
-  $zip->addFile("data/${config['product']}/md_patcher-${config['kernel']}.ko", 'vendor/lib/modules/md_patcher.ko') or
-    die("Cannot add md_patcher.ko to zip archive (the specified kernel version is not supported).\n");
+  if($cssd_offset !== false)
+  {
+    $zip->addFile("data/${config['product']}/md_patcher${config['kernel']}.ko", 'vendor/lib/modules/md_patcher.ko') or
+      die("Cannot add md_patcher.ko to zip archive (the specified kernel version is not supported).\n");
+  }
   $zip->addFile("data/${config['product']}/updater-script.txt", 'META-INF/com/google/android/updater-script') or
     die("Cannot add updater-script to zip archive.\n");
   $zip->close();
