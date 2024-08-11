@@ -72,6 +72,8 @@
 
   function convert_imei($imei)
   {
+    if($imei == '000000000000000')
+      return str_repeat("\xFF", 10);
     $imei .= 'F0000';
     swap_bytes($imei);
     return hex2bin($imei);
