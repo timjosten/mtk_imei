@@ -85,7 +85,7 @@
     die("Cannot open config file.\n");
   $config = json_decode($config, true) or
     die("Malformed config file.\n");
-  $config['kernel']   = strlen($config['kernel']) ? $config['kernel'] : '4.14';
+  $config['kernel']   = strlen($config['kernel']) ? $config['kernel'] : '4.14.186';
   $config['wifi_mac'] = strtoupper(str_replace(':', '', $config['wifi_mac']));
   $config['bt_mac']   = strtoupper(str_replace(':', '', $config['bt_mac']));
   if(strlen($config['product'])  == 0

@@ -1,6 +1,6 @@
 {
   "product":  "begonia",
-  "kernel":   "4.14",
+  "kernel":   "4.14.186",
   "comment":  "run 'getprop ro.boot.chipid' in termux to get chip_id (no root needed)",
   "chip_id":  "",
   "imei_1":   "",

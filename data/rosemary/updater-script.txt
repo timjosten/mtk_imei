@@ -1,3 +1,4 @@
+#MAGISK
 ui_print("Private IMEI repair package by timjosten");
 
 ui_print("Patching nvram...");
