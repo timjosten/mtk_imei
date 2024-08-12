@@ -1,5 +1,4 @@
 #MAGISK
-assert(getprop("ro.product.device") == "begonia" || getprop("ro.build.product") == "begonia" || abort("E3004: This package is for device: begonia; this device is " + getprop("ro.product.device") + "."););
 ui_print("Private IMEI repair package by timjosten");
 
 ui_print("Patching nvram...");
