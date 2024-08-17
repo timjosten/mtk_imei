@@ -167,7 +167,7 @@
     die("Cannot open original NVRAM image (this product is not supported yet).\n");
   $toc_size = 0x20000;
   $content_size = unpack('V', $nvram, 4)[1];
-  $ld0b_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/LD0B_001');
+  $ld0b_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/LD0B_00');
   if($ld0b_offset !== false)
     $ld0b_offset = $toc_size + unpack('V', $nvram, $ld0b_offset - 8)[1];
   $cssd_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/CSSD_000');
@@ -189,6 +189,8 @@
     die("Cannot open NVRAM image.\n");
   if($ld0b_offset !== false)
   {
+    fseek($fp, $ld0b_offset + 12);
+    fwrite($fp, "\x0A");
     fseek($fp, $ld0b_offset + 64);
     fwrite($fp, $ld0b);
   }
