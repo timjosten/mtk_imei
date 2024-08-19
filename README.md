@@ -2,7 +2,7 @@
 A script that recreates NVRAM partition and makes private TWRP flashable for your phone
 
 ## Supported devices
-- Redmi Note 8 Pro (kernel 4.14.186 and higher)
+- Redmi Note 8 Pro
 - Redmi Note 10S / Redmi Note 11 SE / POCO M5s
 - Redmi Note 12S
 - Redmi 12C / POCO C55
