@@ -85,10 +85,12 @@
     die("Cannot open config file.\n");
   $config = json_decode($config, true) or
     die("Malformed config file.\n");
+  $config['device']   = strlen($config['device']) ? $config['device'] : $config['product'];
+  $config['patch_cert'] = $config['device'] == 'begonia' ? 1 : $config['patch_cert'];  // begonia is rsa-only
   $config['kernel']   = strlen($config['kernel']) ? $config['kernel'] : '4.14.186';
   $config['wifi_mac'] = strtoupper(str_replace(':', '', $config['wifi_mac']));
   $config['bt_mac']   = strtoupper(str_replace(':', '', $config['bt_mac']));
-  if(strlen($config['product'])  == 0
+  if(strlen($config['device'])   == 0
   || strlen($config['chip_id'])  != 34
   || strlen($config['imei_1'])   != 15
   || strlen($config['imei_2'])   != 15
@@ -96,6 +98,8 @@
   || strlen($config['wifi_mac']) != 12
   || strlen($config['bt_mac'])   != 12)
     die("Incorrect values in config file.\n");
+  if($config['imei_1'] == $config['imei_2'])
+    die("IMEI1 and IMEI2 must be different.\n");
 
   $privatekey_2048 = file_get_contents('data/private_2048.pem') or
     die("Cannot open private key 2048.\n");
@@ -108,7 +112,7 @@
 
   $data = $exponent_1024;
   $data .= bin2hex($modulus_1024);
-  $data .= $config['product'];
+  $data .= $config['device'];
   $signature = "\x00\x01";
   $signature .= str_repeat("\xFF", 221);
   $signature .= "\x00";
@@ -163,8 +167,8 @@
   $key2 = openssl_encrypt($key2, 'aes-256-cbc', $key,  OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, substr($iv, 0, 16));
   $ld0b = openssl_encrypt($ld0b, 'aes-128-ecb', $key2, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
 
-  $nvram = file_get_contents("data/${config['product']}/nvram.bin") or
-    die("Cannot open original NVRAM image (this product is not supported yet).\n");
+  $nvram = file_get_contents("data/${config['device']}/nvram.bin") or
+    die("Cannot open original NVRAM image (this device is not supported yet).\n");
   $toc_size = 0x20000;
   $content_size = unpack('V', $nvram, 4)[1];
   $ld0b_offset = strpos($nvram, '/mnt/vendor/nvdata/md/NVRAM/NVD_IMEI/LD0B_00');
@@ -215,8 +219,9 @@
   fwrite($fp, checksum_nvram($content));
   fclose($fp);
 
-  $config['kernel'] = $cssd_offset !== false ? '-'.$config['kernel'] : '';
-  $out = "out/imei_repair-${config['product']}${config['kernel']}.zip";
+  $patch_cert = $config['patch_cert'] && $cssd_offset !== false;
+  $kernel = $patch_cert ? '-'.$config['kernel'] : '';
+  $out = "out/imei_repair-${config['device']}${kernel}.zip";
   copy('data/patch.zip', $out) or
     die("Cannot copy zip archive.\n");
   $zip = new ZipArchive;
@@ -224,12 +229,14 @@
     die("Cannot open zip archive.\n");
   $zip->addFile('out/nvram.img', 'nvram.img') or
     die("Cannot add nvram.img to zip archive.\n");
-  if($cssd_offset !== false)
+  if($patch_cert)
   {
-    $zip->addFile("data/${config['product']}/md_patcher${config['kernel']}.ko", 'vendor/lib/modules/md_patcher.ko') or
-      die("Cannot add md_patcher.ko to zip archive (the specified kernel version is not supported).\n");
+    $zip->addFile("data/${config['device']}/md_patcher${kernel}.ko", 'vendor/lib/modules/md_patcher.ko') or
+      die("Cannot add md_patcher.ko to zip archive (the specified kernel version '${config['kernel']}' is not supported).\n");
   }
-  $zip->addFile("data/${config['product']}/updater-script.txt", 'META-INF/com/google/android/updater-script') or
+  else
+    $zip->deleteName('vendor/etc/init/md_patcher.rc');
+  $zip->addFile("data/${config['device']}/updater-script.txt", 'META-INF/com/google/android/updater-script') or
     die("Cannot add updater-script to zip archive.\n");
   $zip->close();
   unlink('out/nvram.img');
