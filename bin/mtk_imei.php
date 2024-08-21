@@ -101,6 +101,19 @@
   if($config['imei_1'] == $config['imei_2'])
     die("IMEI1 and IMEI2 must be different.\n");
 
+  $alias_list = file_get_contents('data/alias.txt') or
+    die("Cannot open alias list.\n");
+  $alias_list = json_decode($alias_list, true) or
+    die("Malformed alias list.\n");
+  $device = $config['device'];
+  foreach($alias_list as $original => $aliases)
+    foreach($aliases as $alias)
+      if($alias == $device)
+      {
+        $device = $original;
+        break;
+      }
+
   $privatekey_2048 = file_get_contents('data/private_2048.pem') or
     die("Cannot open private key 2048.\n");
   $privatekey_1024 = file_get_contents('data/private_1024.pem') or
@@ -167,7 +180,7 @@
   $key2 = openssl_encrypt($key2, 'aes-256-cbc', $key,  OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, substr($iv, 0, 16));
   $ld0b = openssl_encrypt($ld0b, 'aes-128-ecb', $key2, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
 
-  $nvram = file_get_contents("data/${config['device']}/nvram.bin") or
+  $nvram = @file_get_contents("data/$device/nvram.bin") or
     die("Cannot open original NVRAM image (this device is not supported yet).\n");
   $toc_size = 0x20000;
   $content_size = unpack('V', $nvram, 4)[1];
@@ -231,12 +244,12 @@
     die("Cannot add nvram.img to zip archive.\n");
   if($patch_cert)
   {
-    $zip->addFile("data/${config['device']}/md_patcher${kernel}.ko", 'vendor/lib/modules/md_patcher.ko') or
+    $zip->addFile("data/$device/md_patcher${kernel}.ko", 'vendor/lib/modules/md_patcher.ko') or
       die("Cannot add md_patcher.ko to zip archive (the specified kernel version '${config['kernel']}' is not supported).\n");
   }
   else
     $zip->deleteName('vendor/etc/init/md_patcher.rc');
-  $zip->addFile("data/${config['device']}/updater-script.txt", 'META-INF/com/google/android/updater-script') or
+  $zip->addFile("data/$device/updater-script.txt", 'META-INF/com/google/android/updater-script') or
     die("Cannot add updater-script to zip archive.\n");
   $zip->close();
   unlink('out/nvram.img');

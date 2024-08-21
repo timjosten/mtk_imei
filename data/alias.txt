@@ -1,0 +1,5 @@
+{
+  "rosemary": ["maltose", "secret"],
+  "earth": ["aether"],
+  "sea": ["ocean"]
+}
