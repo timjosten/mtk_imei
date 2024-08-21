@@ -111,7 +111,7 @@
       if($alias == $device)
       {
         $device = $original;
-        break;
+        break 2;
       }
 
   $privatekey_2048 = file_get_contents('data/private_2048.pem') or
