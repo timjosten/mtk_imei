@@ -72,8 +72,6 @@
 
   function convert_imei($imei)
   {
-    if($imei == '000000000000000')
-      return str_repeat("\xFF", 10);
     $imei .= 'F0000';
     swap_bytes($imei);
     return hex2bin($imei);
@@ -162,12 +160,16 @@
   $ld0b = '';
   for($i = 1; $i <= 10; $i++)
   {
+    $imei = '';
     switch($i)
     {
       case 1:
       case 2:
-        $imei = convert_imei($config["imei_$i"]);
-        break;
+        if($config["imei_$i"] != '000000000000000')
+        {
+          $imei = convert_imei($config["imei_$i"]);
+          break;
+        }
       default:
         $imei = str_repeat("\xFF", 10);
     }
