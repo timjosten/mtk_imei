@@ -1,5 +1,6 @@
 {
   "rosemary": ["maltose", "secret"],
   "earth": ["aether"],
+  "selene": ["eos"],
   "sea": ["ocean"]
 }
