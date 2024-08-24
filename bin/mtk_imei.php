@@ -87,6 +87,7 @@
     die("Malformed config file.\n");
   $config['device']   = strlen($config['device']) ? $config['device'] : $config['product'];
   $config['patch_cert'] = $config['device'] == 'begonia' ? 1 : $config['patch_cert'];  // begonia is rsa-only
+  $config['chip_id']  = !$config['patch_cert'] && strlen($config['chip_id']) != 34 ? '0x'.md5('') : $config['chip_id'];
   $config['kernel']   = strlen($config['kernel']) ? $config['kernel'] : '4.14.186';
   $config['wifi_mac'] = strtoupper(str_replace(':', '', $config['wifi_mac']));
   $config['bt_mac']   = strtoupper(str_replace(':', '', $config['bt_mac']));
