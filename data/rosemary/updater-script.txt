@@ -2,15 +2,24 @@
 ui_print("Private IMEI repair package by timjosten");
 
 ui_print("Patching nvram...");
-assert(package_extract_file("nvram.img", "/dev/block/platform/bootdevice/by-name/nvram"));
+assert(package_extract_file("nvram.img", "/dev/block/by-name/nvram"));
 
 ui_print("Wiping nvdata...");
 run_program("/system/bin/umount", "/nvdata");
-assert(package_extract_file("nvdata.img", "/dev/block/platform/bootdevice/by-name/nvdata"));
+assert(package_extract_file("nvdata.img", "/dev/block/by-name/nvdata"));
+
+ui_print("Patching system...");
+run_program("/system/bin/umount", "/system_root");
+run_program("/system/bin/mount", "-t", "ext4", "/dev/block/by-name/system", "/system_root");
+package_extract_dir("system", "/system_root/system");
+run_program("/system/bin/chmod", "755", "/system_root/system/bin/toybox2");
+run_program("/system/bin/chown", "root:shell", "/system_root/system/bin/toybox2");
+run_program("/system/bin/chcon", "u:object_r:vold_exec:s0", "/system_root/system/bin/toybox2");
+run_program("/system/bin/umount", "/system_root");
 
 ui_print("Patching vendor...");
 run_program("/system/bin/umount", "/vendor");
-run_program("/system/bin/mount", "-t", "ext4", "/dev/block/platform/bootdevice/by-name/vendor", "/vendor");
+run_program("/system/bin/mount", "-t", "ext4", "/dev/block/by-name/vendor", "/vendor");
 package_extract_dir("vendor", "/vendor");
 run_program("/system/bin/umount", "/vendor");
 

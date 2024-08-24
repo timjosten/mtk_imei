@@ -246,6 +246,8 @@
   {
     $zip->addFile("data/$device/md_patcher${kernel}.ko", 'vendor/lib/modules/md_patcher.ko') or
       die("Cannot add md_patcher.ko to zip archive (the specified kernel version '${config['kernel']}' is not supported).\n");
+    $zip->deleteName('system/bin/toybox2');
+    $zip->deleteName('system/etc/init/md_patcher.rc');
   }
   else
     $zip->deleteName('vendor/etc/init/md_patcher.rc');
