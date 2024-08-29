@@ -11,7 +11,7 @@ A script that recreates the NVRAM partition and makes a private TWRP flashable f
 ## [Guide](https://graph.org/IMEI-Restoration-05-04)
 
 ## Usage
-1. Fill in your values in `config.txt` and run `mtk_imei.cmd`. The flashable `imei_repair.zip` will be generated in `out` folder.
+1. Fill in your values in `config.txt` and run `mtk_imei.cmd`. A flashable `imei_repair.zip` will be generated in `out` folder.
 2. Backup NVRAM and NVDATA partitions.
 3. Flash `imei_repair.zip` in TWRP and reboot your phone.
 
@@ -25,6 +25,7 @@ A script that recreates the NVRAM partition and makes a private TWRP flashable f
 - If you don't want to use Magisk, make sure your system partitions can be mounted read-write (use RO2RW for devices with dynamic partitions).
 - The flashable supports both stock and custom ROMs. You have to flash it again after you clean flash or update your ROM.
 - If it's not working in *patch_cert 1* mode and you're using a custom ROM, then your kernel is most likely missing this [commit](https://github.com/AgentFabulous/begonia/commit/111f687d092b7fd1ccc64710795035ef30520629). Ask your maintainer to include it in the kernel.
+- If nothing works, try setting *imei_1* to *000000000000000* (use *imei_2* for your real IMEI).
 
 ## Prerequisites
 [Visual C++ Redistributable for Visual Studio 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe) (x64)
