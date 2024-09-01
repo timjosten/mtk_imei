@@ -24,7 +24,6 @@ A script that recreates the NVRAM partition and makes a private TWRP flashable f
 - The generated zip is also a Magisk module. It is installed automatically for devices with read-only dynamic partitions. Make sure your recovery can mount the internal storage before flashing the zip.
 - If you don't want to use Magisk, make sure your system partitions can be mounted read-write (use RO2RW for devices with dynamic partitions).
 - The flashable supports both stock and custom ROMs. You have to flash it again after you clean flash or update your ROM.
-- If it's not working in *patch_cert 1* mode and you're using a custom ROM, then your kernel is most likely missing this [commit](https://github.com/AgentFabulous/begonia/commit/111f687d092b7fd1ccc64710795035ef30520629). Ask your maintainer to include it in the kernel.
 - If nothing works, try setting *imei_1* to *000000000000000* (use *imei_2* for your real IMEI).
 
 ## Prerequisites
