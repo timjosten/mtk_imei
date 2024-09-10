@@ -2,5 +2,6 @@
   "rosemary": ["maltose", "secret"],
   "earth": ["aether"],
   "selene": ["eos"],
+  "fire": ["heat"],
   "sea": ["ocean"]
 }
