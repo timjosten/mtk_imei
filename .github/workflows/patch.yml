@@ -52,7 +52,7 @@ jobs:
                 "bt_mac":   "${{ inputs.BT_MAC }}"
               }" > config.txt
           
-         php bin/mtk_imei.php
+         bash mtk_imei.sh
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.2.1-node20
