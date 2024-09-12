@@ -38,10 +38,8 @@ jobs:
     steps:
     - name: Patch
       run: |
-        ls
         sudo apt-get update
         sudo apt-get install php
-        rm config.txt
         echo "{
                 "patch_cert": 0,
                 "device":   "${{ inputs.PRODUCT }}",
@@ -52,7 +50,8 @@ jobs:
                 "imei_2":   "${{ inputs.IMEI_2 }}",
                 "wifi_mac": "${{ inputs.WIFI_MAC }}",
                 "bt_mac":   "${{ inputs.BT_MAC }}"
-              }"
+              }" > config.txt
+          
          php bin/mtk_imei.php
 
     - name: Upload a Build Artifact
