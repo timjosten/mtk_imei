@@ -58,7 +58,7 @@ jobs:
                 "wifi_mac": "${{ inputs.WIFI_MAC }}",
                 "bt_mac":   "${{ inputs.BT_MAC }}"
               }" > config.txt
-         bash mtk_imei.sh
+        bash mtk_imei.sh
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.2.1-node20
