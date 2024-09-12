@@ -36,6 +36,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: List current directory 
+      run: ls
+      
     - name: Patch
       run: |
         sudo apt-get update
