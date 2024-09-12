@@ -36,12 +36,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Clone repository
+        uses: actions/checkout@v4
+
     - name: List current directory 
       run: ls
       
     - name: Patch
       run: |
-        cd ${{ github.workspace }}
         rm config.txt
         sudo apt-get update
         sudo apt-get install php
