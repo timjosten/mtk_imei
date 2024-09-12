@@ -1,4 +1,4 @@
-name: Recovery Build
+name: Generate imei_patcher
 
 on:
   workflow_dispatch:
