@@ -41,6 +41,8 @@ jobs:
       
     - name: Patch
       run: |
+        cd ${{ github.workspace }}
+        rm config.txt
         sudo apt-get update
         sudo apt-get install php
         echo "{
@@ -54,7 +56,6 @@ jobs:
                 "wifi_mac": "${{ inputs.WIFI_MAC }}",
                 "bt_mac":   "${{ inputs.BT_MAC }}"
               }" > config.txt
-          
          bash mtk_imei.sh
 
     - name: Upload a Build Artifact
