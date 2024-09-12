@@ -1,0 +1,62 @@
+name: Recovery Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      PRODUCT:
+        description: Device codename
+        required: true
+        default: begonia
+      KERNEL:
+        description: Device kernel version
+        required: true
+        default: 4.14.186
+      CHIP_ID:
+        description: Path the device tree should be synced to, relative to source root
+        required: true
+        default: 0x00
+      IMEI_1:
+        description: Device IMEI 1
+        required: true
+        default: 0x00
+      IMEI_2:
+        description: Device IMEI 2
+        required: true
+        default: 0x00
+      WIFI_MAC:
+        description: Device Wi-Fi MAC
+        required: true
+        default: ABCD
+      BT_MAC:
+        description: Device Bluetooth MAC
+        required: true
+        default: ABCD
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Patch
+      run: |
+        sudo apt-get update
+        sudo apt-get install php
+        rm config.txt
+        echo "{
+                "patch_cert": 0,
+                "device":   "${{ inputs.PRODUCT }}",
+                "kernel":   "${{ inputs.KERNEL }}",
+                "comment":  "run 'getprop ro.boot.chipid' in termux to get chip_id (no root needed)",
+                "chip_id":  "${{ inputs.CHIP_ID }}",
+                "imei_1":   "${{ inputs.IMEI_1 }}",
+                "imei_2":   "${{ inputs.IMEI_2 }}",
+                "wifi_mac": "${{ inputs.WIFI_MAC }}",
+                "bt_mac":   "${{ inputs.BT_MAC }}"
+              }"
+         php bin/mtk_imei.php
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.2.1-node20
+      with:
+        name: imei_repair.zip
+        path: out/
+          
