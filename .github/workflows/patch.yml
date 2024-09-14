@@ -23,7 +23,7 @@ jobs:
         rm config.txt
         'echo "$CONFIG" > config.txt'
       env:
-        CONFIG: ${{secrets.CONFIG}}
+        CONFIG: ${{secrets.GITHUB_CONFIG}}
 
     - name: Patch
       run: bash mtk_imei.sh
