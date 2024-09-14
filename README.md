@@ -11,10 +11,18 @@ A script that recreates the NVRAM partition and makes a private TWRP flashable f
 
 ## [Guide](https://graph.org/IMEI-Restoration-05-04)
 
-## Usage
+## Usage (PC)
 1. Fill in your values in `config.txt` and run `mtk_imei.cmd`. A flashable `imei_repair.zip` will be generated in `out` folder.
 2. Backup NVRAM and NVDATA partitions.
 3. Flash `imei_repair.zip` in TWRP and reboot your phone.
+
+## Usage (GitHub Actions)
+1. Fork this repository
+2. Copy "config.txt" and paste it in Actions secret.
+3. Modify the value and save it as "CONFIG"
+4. Run the workflow.
+5. Download the flashable from releases.
+6. Flash `imei_repair.zip` in TWRP and reboot your phone.
 
 ## Uninstall
 1. Restore NVRAM and NVDATA partitions from backup.

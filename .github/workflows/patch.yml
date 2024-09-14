@@ -1,0 +1,36 @@
+name: Generate imei_patcher
+
+on:
+  workflow_dispatch:
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+
+    - name: Setup PHP with PECL extension
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+
+    - name: List current directory 
+      run: ls
+      
+    - name: Input file
+      run: |
+        rm config.txt
+        echo "$CONFIG" > config.txt
+      env:
+        CONFIG: ${{secrets.CONFIG}}
+
+    - name: Patch
+      run: bash mtk_imei.sh
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.2.1-node20
+      with:
+        name: imei_repair.zip
+        path: out/
+          
