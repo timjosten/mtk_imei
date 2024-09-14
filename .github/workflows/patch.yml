@@ -2,36 +2,7 @@ name: Generate imei_patcher
 
 on:
   workflow_dispatch:
-    inputs:
-      PRODUCT:
-        description: Device codename
-        required: true
-        default: begonia
-      KERNEL:
-        description: Device kernel version
-        required: true
-        default: 4.14.186
-      CHIP_ID:
-        description: "run 'getprop ro.boot.chipid' in termux to get chip_id"
-        required: true
-        default: 0x01
-      IMEI_1:
-        description: Device IMEI 1
-        required: true
-        default: 0x01
-      IMEI_2:
-        description: Device IMEI 2
-        required: true
-        default: 0x01
-      WIFI_MAC:
-        description: Device Wi-Fi MAC
-        required: true
-        default: ABCD
-      BT_MAC:
-        description: Device Bluetooth MAC
-        required: true
-        default: ABCD
-
+    
 jobs:
   build:
     runs-on: ubuntu-latest
