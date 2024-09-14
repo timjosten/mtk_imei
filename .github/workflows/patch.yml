@@ -39,26 +39,23 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v4
 
+    - name: Setup PHP with PECL extension
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+
     - name: List current directory 
       run: ls
       
-    - name: Patch
+    - name: Input file
       run: |
         rm config.txt
-        sudo apt-get update
-        sudo apt-get install php
-        echo "{
-                "patch_cert": 0,
-                "device":   "${{ inputs.PRODUCT }}",
-                "kernel":   "${{ inputs.KERNEL }}",
-                "comment":  "run 'getprop ro.boot.chipid' in termux to get chip_id (no root needed)",
-                "chip_id":  "${{ inputs.CHIP_ID }}",
-                "imei_1":   "${{ inputs.IMEI_1 }}",
-                "imei_2":   "${{ inputs.IMEI_2 }}",
-                "wifi_mac": "${{ inputs.WIFI_MAC }}",
-                "bt_mac":   "${{ inputs.BT_MAC }}"
-              }" > config.txt
-        bash mtk_imei.sh
+        'echo "$CONFIG" > config.txt'
+      env:
+        SSH_KEY: ${{secrets.CONFIG}}
+
+    - name: Patch
+      run: bash mtk_imei.sh
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.2.1-node20
