@@ -23,7 +23,7 @@ jobs:
         rm config.txt
         'echo "$CONFIG" > config.txt'
       env:
-        SSH_KEY: ${{secrets.CONFIG}}
+        CONFIG: ${{secrets.CONFIG}}
 
     - name: Patch
       run: bash mtk_imei.sh
