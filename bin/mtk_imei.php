@@ -237,7 +237,7 @@
 
   $patch_cert = $config['patch_cert'] && $cssd_offset !== false;
   $kernel = $patch_cert ? '-'.$config['kernel'] : '';
-  $out = "out/imei_repair-${config['device']}${kernel}.zip";
+  $out = "out/imei_repair-{$config['device']}{$kernel}.zip";
   copy('data/patch.zip', $out) or
     die("Cannot copy zip archive.\n");
   $zip = new ZipArchive;
@@ -247,8 +247,8 @@
     die("Cannot add nvram.img to zip archive.\n");
   if($patch_cert)
   {
-    $zip->addFile("data/$device/md_patcher${kernel}.ko", 'vendor/lib/modules/md_patcher.ko') or
-      die("Cannot add md_patcher.ko to zip archive (the specified kernel version '${config['kernel']}' is not supported).\n");
+    $zip->addFile("data/$device/md_patcher{$kernel}.ko", 'vendor/lib/modules/md_patcher.ko') or
+      die("Cannot add md_patcher.ko to zip archive (the specified kernel version '{$config['kernel']}' is not supported).\n");
     $zip->deleteName('system/bin/toybox2');
     $zip->deleteName('system/etc/init/md_patcher.rc');
   }
