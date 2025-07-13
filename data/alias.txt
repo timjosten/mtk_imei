@@ -3,5 +3,6 @@
   "earth": ["aether"],
   "selene": ["eos"],
   "fire": ["heat"],
-  "sea": ["ocean"]
+  "sea": ["ocean"],
+  "lancelot": ["galahad"]
 }
