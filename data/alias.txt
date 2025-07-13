@@ -1,8 +1,7 @@
 {
   "rosemary": ["maltose", "secret"],
-  "earth": ["aether"],
+  "earth": ["aether", "lancelot", "galahad"],
   "selene": ["eos"],
   "fire": ["heat"],
-  "sea": ["ocean"],
-  "lancelot": ["galahad"]
+  "sea": ["ocean"]
 }
