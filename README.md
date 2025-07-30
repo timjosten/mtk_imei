@@ -8,6 +8,7 @@ A script that recreates the NVRAM partition and makes a private TWRP flashable f
 - Redmi 10 / Redmi 10 2022 / Redmi 10 Prime / Redmi 10 Prime 2022 / Redmi Note 11 4G
 - Redmi 12C / POCO C55
 - Redmi 12
+- Redmi 9
 
 ## [Guide](https://graph.org/IMEI-Restoration-05-04)
 
